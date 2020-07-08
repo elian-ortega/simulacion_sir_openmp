@@ -1,0 +1,2 @@
+\\Mac\Home\Desktop\UCR\Semestre I\Programacion Paralela\CPP\openmp\openmp_elianortega\SimulacionSIR\SimulacionSIR\Debug\SimulacionSIR.exe
+\\Mac\Home\Desktop\UCR\Semestre I\Programacion Paralela\CPP\openmp\openmp_elianortega\SimulacionSIR\SimulacionSIR\Debug\SimulacionSIR.pdb
