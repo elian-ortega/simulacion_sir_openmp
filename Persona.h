@@ -64,7 +64,7 @@ Persona::Persona(int nId, bool estado, int posX, int posY, int rad, int vel, int
 			this->minx = posX - rad;
 		}
 
-		if (posX + rad > tmm-1) {
+		if (posX + rad > tmm - 1) {
 			this->maxx = tmm - 1;
 		}
 		else {
