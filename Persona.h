@@ -62,8 +62,17 @@ Persona::Persona( int estado, int rad, int vel, int tmm, double potenciaInfeccio
 		this->generarDuracionEnfermedad();
 	}
 
+<<<<<<< HEAD
 	this->generarPosicion();
 }
+=======
+		if (posX + rad > tmm - 1) {
+			this->maxx = tmm - 1;
+		}
+		else {
+			this->maxx = posX + rad;
+		}
+>>>>>>> 6fa7e2bbf29635e3f0270971f957d918f1419633
 
 void Persona::seInfecto() {
 	if (this->seContagio()) {
