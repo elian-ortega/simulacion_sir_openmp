@@ -1,1 +1,2 @@
 \\Mac\Home\Desktop\UCR\Semestre I\Programacion Paralela\CPP\openmp\openmp_elianortega\SimulacionSIR\SimulacionSIR\Release\SimulacionSIR.exe
+C:\Users\Ronald León Morales\Documents\UCR\paralela\simulacion_sir_openmp\Release\SimulacionSIR.exe
