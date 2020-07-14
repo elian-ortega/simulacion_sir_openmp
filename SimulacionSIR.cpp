@@ -34,8 +34,20 @@ int main()
     int drc = 1000; // duración de la siomulación ]0,100000]
     int tmm = floor(sqrt(cpr / toc)) + 1; // tamaño de la matriz
     int nhilos = 8; // cantidad de hilos
+
+    vector<Persona> personas;
     vector<vector<vector<Persona> > > espacio (tmm, vector<vector<Persona>>(tmm, vector<Persona>()));
     vector<vector<vector<Persona> > > espacionuevo (tmm, vector<vector<Persona>>(tmm, vector<Persona>()));
+
+    vector < vector<list<Persona>>> matriz_listas;
+    vector<list<Persona>> incicializacion;
+
+    incicializacion.resize(10);
+    matriz_listas.resize(10, incicializacion);
+
+
+
+
     //Variables para recolectar los datos al final de cada dia
     int  suceptiblesGlobal = 0;
     int  infectadosGlobal = 0;
@@ -47,164 +59,55 @@ int main()
     int mayores = cpr - jovenes; //cantidad de personas mayores
     int jovenesi = floor(poi * 0.9045); //cantidad de personas jovenes infectadas
     int mayoresi = poi - jovenesi; //cantidad de personas mayores infectadas
-    int i, j, k, l;
-   
-#pragma omp parallel num_threads(nhilos)
-#pragma omp for  schedule(static,2)   
-    for (i = 0; i < jovenes; ++i) {
-        int posx = rand() % tmm;
-        int posy = rand() % tmm;
+
+    for (int i = 0; i < jovenes; ++i) {
         if (i < jovenesi) { // jovenes infectados
-            Persona persona = Persona(i, 1, posx, posy, rmj, vmj, tmm, true);
-            espacio[posx][posy].push_back(persona);
+            Persona persona = Persona(1,  rmj, vmj,  tmm,  poi,  prj,  dmn, dmx);
+            personas.push_back(persona);
         }
         else { // jovenes sanos
-            Persona persona = Persona(i, 0, posx, posy, rmj, vmj, tmm, true);
-            espacio[posx][posy].push_back(persona);
+            Persona persona = Persona(0, rmj, vmj, tmm, poi, prj, dmn, dmx);
+            personas.push_back(persona);
         }
     }
 
-#pragma omp for  schedule(static,2) 
-    for (i = 0 ; i < mayores; ++i) {
-        int posx = rand() % tmm;
-        int posy = rand() % tmm;
+    for (int i = 0; i < mayores; ++i) {
         if (i < mayoresi) { // mayores infectados
-            Persona persona = Persona(i, 1, posx, posy, rmm, vmm, tmm, false);
-            espacio[posx][posy].push_back(persona);
+            Persona persona = Persona(1, rmm, vmm, tmm, poi, prv, dmn, dmx);
+            personas.push_back(persona);
         }
         else { // mayores sanos
-            Persona persona = Persona(i, 0, posx, posy, rmm, vmm, tmm, false);
-            espacio[posx][posy].push_back(persona);
+            Persona persona = Persona(1, rmm, vmm, tmm, poi, prv, dmn, dmx);
+            personas.push_back(persona);
         }
     }
+    
+    /*for (i = 0; i < personas.size(); i++) {
+       cout << i + 1 << "=> " << personas[i].posicionActual[0] << ":" << personas[i].posicionActual[1] << endl;
+    }*/
+    
+   
+    
+#pragma omp parallel num_threads(nhilos)
+    {
+#pragma omp parallel for
+        for (int i = 0; i < personas.size(); i++) {
+            int x = personas[i].posicionActual[0];
+            int y = personas[i].posicionActual[1];
+            espacio[x][y].push_back(personas[i]);
+        }
 
-#pragma omp barrier
-
-    for (int g = 0; g < drc; ++g) {
-#pragma omp for  schedule(static)   
-        for (i = 0; i < tmm; ++i) {
-            for (j = 0; j < tmm; ++j) {
-                int infectados = 0;
-                for (k = 0; k < espacio[i][j].size(); ++k) {// cuenta infectados y los procesa
-                    if (espacio[i][j][k].estado == 1) {
-                        infectados++;
-                        if (espacio[i][j][k].duracionEnfermedad == 0) {//temino enfermedad
-                            float proba = rand() % 100;
-                            proba = proba / 100;
-                            if (espacio[i][j][k].esJoven) { // Es joven
-                                if (proba <= prj) { // se recupera
-                                    recuperadosGlobal++;
-                                    espacio[i][j][k].tiempoInmune = rand() % (480 - 200 + 1) + 200;
-                                    espacio[i][j][k].estado = 2;
-                                }
-                                else { // se muere
-                                    muertosGlobal++;
-                                    espacio[i][j][k].estado = 3;
-                                }
-                            }
-                            else {// Es mayor
-                                if (proba <= prv) { // se recupera
-                                    recuperadosGlobal++;
-                                    espacio[i][j][k].tiempoInmune = rand() % (480 - 200 + 1) + 200;
-                                    espacio[i][j][k].estado = 2;
-                                }
-                                else { // se muere
-                                    muertosGlobal++;
-                                    espacio[i][j][k].estado = 3;
-                                }
-                            }
-                        }
-                        else { // reduce lo que le queda de enfermedad 
-                            espacio[i][j][k].duracionEnfermedad--;
-                        }
-                    }
-                }
-                for (k = 0; k < espacio[i][j].size(); ++k) { // procesa los no infectados
-                    if (espacio[i][j][k].estado == 0) { // es suceptible
-                        for (l = 0; l < infectados && espacio[i][j][k].estado == 0; ++l) { //calcula la proba de contagiarse por cada infectado en la casilla
-                            float proba = rand() % 100;
-                            proba = proba / 100;
-                            if (proba <= piv) {
-                                infectadosGlobal++; // tal vez hay que hacerlo critical
-                                espacio[i][j][k].estado = 1;
-                                espacio[i][j][k].duracionEnfermedad = rand() % (dmx - dmn + 1) + dmn;
-                            }
-                        }
-                    }
-                    else if (espacio[i][j][k].estado == 2) {
-                        if (espacio[i][j][k].tiempoInmune == 0) {
-                            suceptiblesGlobal++;
-                            espacio[i][j][k].estado = 0;
-                        }
-                        else {
-                            espacio[i][j][k].tiempoInmune--;
-                        }
-                    }
-
-                    //Moverse 
-
-                    int posxa = espacio[i][j][k].posicionActual[0];
-                    int posya = espacio[i][j][k].posicionActual[1];
-                    int maxx = espacio[i][j][k].maxx;
-                    int minx = espacio[i][j][k].minx;
-                    int maxy = espacio[i][j][k].maxy;
-                    int miny = espacio[i][j][k].miny;
-                    int direccion = rand() % 3 + 1;
-                    int vel = espacio[i][j][k].vel;
-                    int rebote = 0;
-
-                    switch (direccion) {
-                    case 1: // arriba
-                        if (posxa - vel < minx) {
-                            rebote = abs((posxa - vel) - minx);
-                            posxa = minx + rebote;
-                        }
-                        else {
-                            posxa = posxa - vel;
-                        }
-                        espacio[i][j][k].posicionActual[0] = posxa;
-                        break;
-                    case 2: // derecha
-                        if (posya + vel > maxy) {
-                            rebote = abs((posya + vel) - maxy);
-                            posya = maxy - rebote;
-                        }
-                        else {
-                            posya = posya + vel;
-                        }
-                        espacio[i][j][k].posicionActual[1] = posya;
-                        break;
-                    case 3: // abajo
-                        if (posxa + vel > maxx) {
-                            rebote = abs((posxa + vel) - maxx);
-                            posxa = maxx - rebote;
-                        }
-                        else {
-                            posxa = posxa + vel;
-                        }
-                        espacio[i][j][k].posicionActual[0] = posxa;
-                        break;
-                    case 4: // izquierda
-                        if (posya - vel < miny) {
-                            rebote = abs((posya - vel) - miny);
-                            posya = miny + rebote;
-                        }
-                        else {
-                            posya = posya - vel;
-                        }
-                        espacio[i][j][k].posicionActual[1] = posya;
-                        break;
-                    }
-#pragma omp critical
-                    espacionuevo[espacio[i][j][k].posicionActual[0]][espacio[i][j][k].posicionActual[1]].push_back(espacio[i][j][k]);
+#pragma omp master
+        {
+            cout << matriz_listas[0].size() <<endl ;
+            int contadora = 0;
+            for (int i = 0; i < matriz_listas[0].size(); i++) {
+                for (int j = 0; j < matriz_listas[0][0].size(); j++) {
+                    cout << "Pos: " << i << ":" << j << endl;
                 }
             }
         }
-        espacio = vector(espacionuevo);
-        espacionuevo = vector<vector<vector<Persona> > >(tmm, vector<vector<Persona>>(tmm, vector<Persona>()));
     }
-    
 
-    
     
 }

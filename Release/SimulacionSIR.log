@@ -1,7 +1,15 @@
 ﻿  SimulacionSIR.cpp
+\\Mac\Home\Desktop\UCR\Semestre I\Programacion Paralela\CPP\openmp\openmp_elianortega\SimulacionSIR\SimulacionSIR\SimulacionSIR.cpp(17,15): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+\\Mac\Home\Desktop\UCR\Semestre I\Programacion Paralela\CPP\openmp\openmp_elianortega\SimulacionSIR\SimulacionSIR\SimulacionSIR.cpp(27,20): warning C4305: 'initializing': truncation from 'double' to 'float'
+\\Mac\Home\Desktop\UCR\Semestre I\Programacion Paralela\CPP\openmp\openmp_elianortega\SimulacionSIR\SimulacionSIR\SimulacionSIR.cpp(35,13): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+\\Mac\Home\Desktop\UCR\Semestre I\Programacion Paralela\CPP\openmp\openmp_elianortega\SimulacionSIR\SimulacionSIR\SimulacionSIR.cpp(58,17): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+\\Mac\Home\Desktop\UCR\Semestre I\Programacion Paralela\CPP\openmp\openmp_elianortega\SimulacionSIR\SimulacionSIR\SimulacionSIR.cpp(60,18): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+\\Mac\Home\Desktop\UCR\Semestre I\Programacion Paralela\CPP\openmp\openmp_elianortega\SimulacionSIR\SimulacionSIR\SimulacionSIR.cpp(94,27): warning C4018: '<': signed/unsigned mismatch
+\\Mac\Home\Desktop\UCR\Semestre I\Programacion Paralela\CPP\openmp\openmp_elianortega\SimulacionSIR\SimulacionSIR\SimulacionSIR.cpp(104,31): warning C4018: '<': signed/unsigned mismatch
+\\Mac\Home\Desktop\UCR\Semestre I\Programacion Paralela\CPP\openmp\openmp_elianortega\SimulacionSIR\SimulacionSIR\SimulacionSIR.cpp(105,35): warning C4018: '<': signed/unsigned mismatch
   Generating code
-  6 of 28 functions (21.4%) were compiled, the rest were copied from previous compilation.
-    2 functions were new in current compilation
-    3 functions had inline decision re-evaluated but remain unchanged
+  3 of 451 functions ( 0.7%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    5 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   SimulacionSIR.vcxproj -> \\Mac\Home\Desktop\UCR\Semestre I\Programacion Paralela\CPP\openmp\openmp_elianortega\SimulacionSIR\SimulacionSIR\Release\SimulacionSIR.exe
