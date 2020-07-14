@@ -34,25 +34,8 @@ int main()
     int drc = 1000; // duración de la siomulación ]0,100000]
     int tmm = floor(sqrt(cpr / toc)) + 1; // tamaño de la matriz
     int nhilos = 8; // cantidad de hilos
-<<<<<<< HEAD
-
-    vector<Persona> personas;
-    vector<vector<vector<Persona> > > espacio (tmm, vector<vector<Persona>>(tmm, vector<Persona>()));
-    vector<vector<vector<Persona> > > espacionuevo (tmm, vector<vector<Persona>>(tmm, vector<Persona>()));
-
-    vector < vector<list<Persona>>> matriz_listas;
-    vector<list<Persona>> incicializacion;
-
-    incicializacion.resize(10);
-    matriz_listas.resize(10, incicializacion);
-
-
-
-
-=======
     vector<vector<vector<Persona> > > espacio(tmm, vector<vector<Persona>>(tmm, vector<Persona>()));
     vector<vector<vector<Persona> > > espacionuevo(tmm, vector<vector<Persona>>(tmm, vector<Persona>()));
->>>>>>> 6fa7e2bbf29635e3f0270971f957d918f1419633
     //Variables para recolectar los datos al final de cada dia
     int  suceptiblesGlobal = cpr - poi;
     int  infectadosGlobal = poi;
@@ -64,76 +47,11 @@ int main()
     int mayores = cpr - jovenes; //cantidad de personas mayores
     int jovenesi = floor(poi * 0.9045); //cantidad de personas jovenes infectadas
     int mayoresi = poi - jovenesi; //cantidad de personas mayores infectadas
-<<<<<<< HEAD
-
-    for (int i = 0; i < jovenes; ++i) {
-        if (i < jovenesi) { // jovenes infectados
-            Persona persona = Persona(1,  rmj, vmj,  tmm,  poi,  prj,  dmn, dmx);
-            personas.push_back(persona);
-        }
-        else { // jovenes sanos
-            Persona persona = Persona(0, rmj, vmj, tmm, poi, prj, dmn, dmx);
-            personas.push_back(persona);
-=======
     int i, j, k, l;
 
 #pragma omp_set_num_threads(nhilos) 
 
 #pragma omp for schedule(static,2)   
-<<<<<<< HEAD
-        for (i = 0; i < jovenes; ++i) {
-            int posx = rand() % tmm;
-            int posy = rand() % tmm;
-            if (i < jovenesi) { // jovenes infectados
-                Persona persona = Persona(i, 1, posx, posy, rmj, vmj, tmm, true);
-                espacio[posx][posy].push_back(persona);
-            }
-            else { // jovenes sanos
-                Persona persona = Persona(i, 0, posx, posy, rmj, vmj, tmm, true);
-                espacio[posx][posy].push_back(persona);
-            }
->>>>>>> 18088a14524279d77fdfac78661afc5cf3a79fee
-        }
-
-<<<<<<< HEAD
-    for (int i = 0; i < mayores; ++i) {
-        if (i < mayoresi) { // mayores infectados
-            Persona persona = Persona(1, rmm, vmm, tmm, poi, prv, dmn, dmx);
-            personas.push_back(persona);
-        }
-        else { // mayores sanos
-            Persona persona = Persona(1, rmm, vmm, tmm, poi, prv, dmn, dmx);
-            personas.push_back(persona);
-        }
-    }
-    
-    /*for (i = 0; i < personas.size(); i++) {
-       cout << i + 1 << "=> " << personas[i].posicionActual[0] << ":" << personas[i].posicionActual[1] << endl;
-    }*/
-    
-   
-    
-#pragma omp parallel num_threads(nhilos)
-    {
-#pragma omp parallel for
-        for (int i = 0; i < personas.size(); i++) {
-            int x = personas[i].posicionActual[0];
-            int y = personas[i].posicionActual[1];
-            espacio[x][y].push_back(personas[i]);
-        }
-
-#pragma omp master
-        {
-            cout << matriz_listas[0].size() <<endl ;
-            int contadora = 0;
-            for (int i = 0; i < matriz_listas[0].size(); i++) {
-                for (int j = 0; j < matriz_listas[0][0].size(); j++) {
-                    cout << "Pos: " << i << ":" << j << endl;
-                }
-            }
-        }
-    }
-=======
     for (i = 0; i < jovenes; ++i) {
         int posx = rand() % tmm;
         int posy = rand() % tmm;
@@ -146,9 +64,7 @@ int main()
             espacio[posx][posy].push_back(persona);
         }
     }
->>>>>>> 6fa7e2bbf29635e3f0270971f957d918f1419633
 
-=======
 #pragma omp for  schedule(static,2) 
     for (i = 0; i < mayores; ++i) {
         int posx = rand() % tmm;
@@ -315,10 +231,5 @@ int main()
          cout << muertosGlobal << endl;*/
 
     }
-<<<<<<< HEAD
->>>>>>> 18088a14524279d77fdfac78661afc5cf3a79fee
-    
-=======
 
->>>>>>> 6fa7e2bbf29635e3f0270971f957d918f1419633
 }
