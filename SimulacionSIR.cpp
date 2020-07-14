@@ -16,7 +16,7 @@ int main()
 {
     srand(time(NULL));
     ofstream resultado;
-    resultado.open("resultado.txt");
+    resultado.open("resultado.csv");
     resultado << "Porcentaje de Susceptibles, Cantidad de Suceptibles, Porcentaje de Infectados, Cantidad de Infectados, Porcentaje de Recuperados, Cantidad de Recuperados, Porcentaje de Muertos, Cantidad de Muertos \n";
     // TODO: PEDIRLO PARAM
     int cpr = 100000; // cantidad de personas int ]0,10000000]
@@ -41,6 +41,10 @@ int main()
     int  infectadosGlobal = poi;
     int  recuperadosGlobal = 0;
     int  muertosGlobal = 0;
+    float promedioSuc = 0.0;
+    float promedioInf = 0.0;
+    float promedioRec = 0.0;
+    float promedioMue = 0.0;
 
     //Crear personas
     int jovenes = floor(cpr * 0.9045); //cantidad de personas jovenes
@@ -222,7 +226,7 @@ int main()
 
         espacio = vector(espacionuevo);
         espacionuevo = vector<vector<vector<Persona> > >(tmm, vector<vector<Persona>>(tmm, vector<Persona>()));
-        resultado << suceptiblesGlobal / cpr << "," << suceptiblesGlobal << "," << infectadosGlobal / cpr << "," << infectadosGlobal << "," << recuperadosGlobal / cpr << "," << recuperadosGlobal << "," << muertosGlobal / cpr << "," << muertosGlobal << "\n";
+        resultado << float (suceptiblesGlobal / cpr) << "," << suceptiblesGlobal << "," << float (infectadosGlobal / cpr) << "," << infectadosGlobal << "," << float (recuperadosGlobal / cpr) << "," << recuperadosGlobal << "," << float (muertosGlobal / cpr) << "," << muertosGlobal << "\n";
         /* cout << "dia:";
          cout << g << endl;
          cout << suceptiblesGlobal << endl;
