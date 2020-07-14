@@ -17,28 +17,28 @@ int main()
     srand(time(NULL));
     ofstream resultado;
     resultado.open("resultado.txt");
-    resultado << "Promedio Susceptibles, Porcentaje Susceptibles, Cantidad de Suceptibles, Promedio Infectados, Porcentaje Infectados, Cantidad de Infectados, Promedio Resistentes, Porcentaje Resistentes, Cantidad de Resistentes, Promedio Muertos, Porcentaje Muertos, Cantidad de Muertos \n";
+    resultado << "Porcentaje de Susceptibles, Cantidad de Suceptibles, Porcentaje de Infectados, Cantidad de Infectados, Porcentaje de Recuperados, Cantidad de Recuperados, Porcentaje de Muertos, Cantidad de Muertos \n";
     // TODO: PEDIRLO PARAM
-    int cpr = 100; // cantidad de personas int ]0,10000000]
-    float piv = 0.25; // potencia infecciosa ]0,1[
+    int cpr = 100000; // cantidad de personas int ]0,10000000]
+    float piv = 0.7; // potencia infecciosa ]0,1[
     float prj = 0.75; // probabilidad de recuperacion jovenes ]0,1[
     float prv = 0.5; // probabilidad de recuperacion mayores ]0,1[
-    int poi = 10; // cantidad de personas originalmente infectadas ]0,100]
+    int poi = 100; // cantidad de personas originalmente infectadas ]0,100]
     float toc = 0.3; // tasa de ocupación ]0,1[ 
     int dmn = 50; // duración minima de la enfermedad ]0,100]
     int dmx = 100; // duración máxima de la enfermedad ]0,100]
     int rmj = 4; // radio de movilidad de jovenes [0,5]
     int rmm = 2; // radio de movilidad de mayores [0,5]
-    int vmj = 5; // velocidad de movimiento jovenes [0,5]
-    int vmm = 3; // velocidad de movimiento mayores [0,5]
+    int vmj = 3; // velocidad de movimiento jovenes [0,5]
+    int vmm = 1; // velocidad de movimiento mayores [0,5]
     int drc = 1000; // duración de la siomulación ]0,100000]
     int tmm = floor(sqrt(cpr / toc)) + 1; // tamaño de la matriz
     int nhilos = 8; // cantidad de hilos
     vector<vector<vector<Persona> > > espacio (tmm, vector<vector<Persona>>(tmm, vector<Persona>()));
     vector<vector<vector<Persona> > > espacionuevo (tmm, vector<vector<Persona>>(tmm, vector<Persona>()));
     //Variables para recolectar los datos al final de cada dia
-    int  suceptiblesGlobal = 0;
-    int  infectadosGlobal = 0;
+    int  suceptiblesGlobal = cpr-poi;
+    int  infectadosGlobal = poi;
     int  recuperadosGlobal = 0;
     int  muertosGlobal = 0;
 
@@ -49,39 +49,48 @@ int main()
     int mayoresi = poi - jovenesi; //cantidad de personas mayores infectadas
     int i, j, k, l;
    
-#pragma omp parallel num_threads(nhilos)
-#pragma omp for  schedule(static,2)   
-    for (i = 0; i < jovenes; ++i) {
-        int posx = rand() % tmm;
-        int posy = rand() % tmm;
-        if (i < jovenesi) { // jovenes infectados
-            Persona persona = Persona(i, 1, posx, posy, rmj, vmj, tmm, true);
-            espacio[posx][posy].push_back(persona);
+#pragma omp_set_num_threads(nhilos) 
+    
+#pragma omp for schedule(static,2)   
+        for (i = 0; i < jovenes; ++i) {
+            int posx = rand() % tmm;
+            int posy = rand() % tmm;
+            if (i < jovenesi) { // jovenes infectados
+                Persona persona = Persona(i, 1, posx, posy, rmj, vmj, tmm, true);
+                espacio[posx][posy].push_back(persona);
+            }
+            else { // jovenes sanos
+                Persona persona = Persona(i, 0, posx, posy, rmj, vmj, tmm, true);
+                espacio[posx][posy].push_back(persona);
+            }
         }
-        else { // jovenes sanos
-            Persona persona = Persona(i, 0, posx, posy, rmj, vmj, tmm, true);
-            espacio[posx][posy].push_back(persona);
-        }
-    }
 
 #pragma omp for  schedule(static,2) 
-    for (i = 0 ; i < mayores; ++i) {
-        int posx = rand() % tmm;
-        int posy = rand() % tmm;
-        if (i < mayoresi) { // mayores infectados
-            Persona persona = Persona(i, 1, posx, posy, rmm, vmm, tmm, false);
-            espacio[posx][posy].push_back(persona);
+        for (i = 0; i < mayores; ++i) {
+            int posx = rand() % tmm;
+            int posy = rand() % tmm;
+            if (i < mayoresi) { // mayores infectados
+                Persona persona = Persona(i, 1, posx, posy, rmm, vmm, tmm, false);
+                espacio[posx][posy].push_back(persona);
+            }
+            else { // mayores sanos
+                Persona persona = Persona(i, 0, posx, posy, rmm, vmm, tmm, false);
+                espacio[posx][posy].push_back(persona);
+            }
         }
-        else { // mayores sanos
-            Persona persona = Persona(i, 0, posx, posy, rmm, vmm, tmm, false);
-            espacio[posx][posy].push_back(persona);
-        }
-    }
 
 #pragma omp barrier
+        
+        /*for (i = 0; i < tmm; ++i) {
+            for (j = 0; j < tmm; ++j) {
+                for (k = 0; k < espacio[i][j].size(); ++k) {
+                    cout << espacio[i][j][k].id << " ";
+                }
+            }
+        }*/
 
-    for (int g = 0; g < drc; ++g) {
-#pragma omp for  schedule(static)   
+        for (int g = 0; g < drc; ++g) {
+#pragma omp for  schedule(static) private (i ,j, k, l)
         for (i = 0; i < tmm; ++i) {
             for (j = 0; j < tmm; ++j) {
                 int infectados = 0;
@@ -94,22 +103,26 @@ int main()
                             if (espacio[i][j][k].esJoven) { // Es joven
                                 if (proba <= prj) { // se recupera
                                     recuperadosGlobal++;
+                                    infectadosGlobal--;
                                     espacio[i][j][k].tiempoInmune = rand() % (480 - 200 + 1) + 200;
                                     espacio[i][j][k].estado = 2;
                                 }
                                 else { // se muere
                                     muertosGlobal++;
+                                    infectadosGlobal--;
                                     espacio[i][j][k].estado = 3;
                                 }
                             }
                             else {// Es mayor
                                 if (proba <= prv) { // se recupera
                                     recuperadosGlobal++;
+                                    infectadosGlobal--;
                                     espacio[i][j][k].tiempoInmune = rand() % (480 - 200 + 1) + 200;
                                     espacio[i][j][k].estado = 2;
                                 }
                                 else { // se muere
                                     muertosGlobal++;
+                                    infectadosGlobal--;
                                     espacio[i][j][k].estado = 3;
                                 }
                             }
@@ -126,6 +139,7 @@ int main()
                             proba = proba / 100;
                             if (proba <= piv) {
                                 infectadosGlobal++; // tal vez hay que hacerlo critical
+                                suceptiblesGlobal--;
                                 espacio[i][j][k].estado = 1;
                                 espacio[i][j][k].duracionEnfermedad = rand() % (dmx - dmn + 1) + dmn;
                             }
@@ -134,6 +148,7 @@ int main()
                     else if (espacio[i][j][k].estado == 2) {
                         if (espacio[i][j][k].tiempoInmune == 0) {
                             suceptiblesGlobal++;
+                            recuperadosGlobal--;
                             espacio[i][j][k].estado = 0;
                         }
                         else {
@@ -196,15 +211,25 @@ int main()
                         break;
                     }
 #pragma omp critical
-                    espacionuevo[espacio[i][j][k].posicionActual[0]][espacio[i][j][k].posicionActual[1]].push_back(espacio[i][j][k]);
+                    {
+
+                       // cout << "pos nueva: "<< espacio[i][j][k].posicionActual[0] << " " << espacio[i][j][k].posicionActual[1] << endl;
+                        espacionuevo[espacio[i][j][k].posicionActual[0]][espacio[i][j][k].posicionActual[1]].push_back(espacio[i][j][k]);
+                    }
                 }
             }
         }
+    
         espacio = vector(espacionuevo);
         espacionuevo = vector<vector<vector<Persona> > >(tmm, vector<vector<Persona>>(tmm, vector<Persona>()));
+        resultado << suceptiblesGlobal / cpr << "," << suceptiblesGlobal << "," << infectadosGlobal / cpr << "," << infectadosGlobal << "," << recuperadosGlobal / cpr << "," << recuperadosGlobal << "," << muertosGlobal / cpr << "," << muertosGlobal << "\n";
+       /* cout << "dia:";
+        cout << g << endl;
+        cout << suceptiblesGlobal << endl;
+        cout << infectadosGlobal << endl;
+        cout << recuperadosGlobal << endl;
+        cout << muertosGlobal << endl;*/
+        
     }
-    
-
-    
     
 }

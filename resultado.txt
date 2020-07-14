@@ -1,0 +1,1 @@
+Promedio Susceptibles, Porcentaje Susceptibles, Cantidad de Suceptibles, Promedio Infectados, Porcentaje Infectados, Cantidad de Infectados, Promedio Resistentes, Porcentaje Resistentes, Cantidad de Resistentes, Promedio Muertos, Porcentaje Muertos, Cantidad de Muertos 
