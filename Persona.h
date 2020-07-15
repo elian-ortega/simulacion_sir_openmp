@@ -50,6 +50,8 @@ Persona::Persona(int nId, bool estado, int posX, int posY, int rad, int vel, int
 	this->posicionActual[1] = posY;
 	this->rad = rad;
 	this->vel = vel;
+	this->duracionEnfermedad = 0;
+	this->tiempoInmune = 0;
 	if (rad == 0) {
 		this->maxx = tmm - 1;
 		this->maxy = tmm - 1;

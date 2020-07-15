@@ -20,11 +20,11 @@ int main()
     resultado << "Porcentaje de Susceptibles, Cantidad de Suceptibles, Porcentaje de Infectados, Cantidad de Infectados, Porcentaje de Recuperados, Cantidad de Recuperados, Porcentaje de Muertos, Cantidad de Muertos \n";
     // TODO: PEDIRLO PARAM
     int cpr = 100000; // cantidad de personas int ]0,10000000]
-    float piv = 0.7; // potencia infecciosa ]0,1[
-    float prj = 0.75; // probabilidad de recuperacion jovenes ]0,1[
-    float prv = 0.5; // probabilidad de recuperacion mayores ]0,1[
+    double piv = 0.7; // potencia infecciosa ]0,1[
+    double prj = 0.75; // probabilidad de recuperacion jovenes ]0,1[
+    double prv = 0.5; // probabilidad de recuperacion mayores ]0,1[
     int poi = 100; // cantidad de personas originalmente infectadas ]0,100]
-    float toc = 0.3; // tasa de ocupación ]0,1[ 
+    double toc = 0.3; // tasa de ocupación ]0,1[ 
     int dmn = 50; // duración minima de la enfermedad ]0,100]
     int dmx = 100; // duración máxima de la enfermedad ]0,100]
     int rmj = 4; // radio de movilidad de jovenes [0,5]
@@ -41,10 +41,10 @@ int main()
     int  infectadosGlobal = poi;
     int  recuperadosGlobal = 0;
     int  muertosGlobal = 0;
-    float promedioSuc = 0.0;
-    float promedioInf = 0.0;
-    float promedioRec = 0.0;
-    float promedioMue = 0.0;
+    double promedioSuc = 0.0;
+    double promedioInf = 0.0;
+    double promedioRec = 0.0;
+    double promedioMue = 0.0;
 
     //Crear personas
     int jovenes = floor(cpr * 0.9045); //cantidad de personas jovenes
@@ -102,7 +102,7 @@ int main()
                     if (espacio[i][j][k].estado == 1) {
                         infectados++;
                         if (espacio[i][j][k].duracionEnfermedad == 0) {//temino enfermedad
-                            float proba = rand() % 100;
+                            double proba = rand() % 100;
                             proba = proba / 100;
                             if (espacio[i][j][k].esJoven) { // Es joven
                                 if (proba <= prj) { // se recupera
@@ -139,7 +139,7 @@ int main()
                 for (k = 0; k < espacio[i][j].size(); ++k) { // procesa los no infectados
                     if (espacio[i][j][k].estado == 0) { // es suceptible
                         for (l = 0; l < infectados && espacio[i][j][k].estado == 0; ++l) { //calcula la proba de contagiarse por cada infectado en la casilla
-                            float proba = rand() % 100;
+                            double proba = rand() % 100;
                             proba = proba / 100;
                             if (proba <= piv) {
                                 infectadosGlobal++; // tal vez hay que hacerlo critical
@@ -226,7 +226,15 @@ int main()
 
         espacio = vector(espacionuevo);
         espacionuevo = vector<vector<vector<Persona> > >(tmm, vector<vector<Persona>>(tmm, vector<Persona>()));
-        resultado << float (suceptiblesGlobal / cpr) << "," << suceptiblesGlobal << "," << float (infectadosGlobal / cpr) << "," << infectadosGlobal << "," << float (recuperadosGlobal / cpr) << "," << recuperadosGlobal << "," << float (muertosGlobal / cpr) << "," << muertosGlobal << "\n";
+        promedioSuc = suceptiblesGlobal;
+        promedioSuc = promedioSuc / cpr;
+        promedioInf = infectadosGlobal;
+        promedioInf = promedioInf / cpr;
+        promedioRec = recuperadosGlobal;
+        promedioRec = promedioRec / cpr;
+        promedioMue = muertosGlobal;
+        promedioMue = promedioMue / cpr;
+        resultado << promedioSuc << "," << suceptiblesGlobal << "," << promedioInf << "," << infectadosGlobal << "," << promedioRec << "," << recuperadosGlobal << "," << promedioMue << "," << muertosGlobal << "\n";
         /* cout << "dia:";
          cout << g << endl;
          cout << suceptiblesGlobal << endl;
