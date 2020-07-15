@@ -50,7 +50,8 @@ int main(int argc, char* argv[]){
     //int nhilos = 16; // cantidad de hilos
     vector<vector<vector<Persona> > > espacio(tmm, vector<vector<Persona>>(tmm, vector<Persona>()));
     vector<vector<vector<Persona> > > espacionuevo(tmm, vector<vector<Persona>>(tmm, vector<Persona>()));
-    //vector<vector<int>> numInfectados(tmm, vector<int>(tmm));
+    vector<vector<int>> numInfectados(tmm, vector<int>(tmm));
+    vector<vector<int>> numInfectadosnuevo(tmm, vector<int>(tmm));
     //Variables para recolectar los datos al final de cada dia
     int  suceptiblesGlobal = cpr - poi;
     int  infectadosGlobal = poi;
@@ -83,6 +84,7 @@ int main(int argc, char* argv[]){
         if (i < jovenesi) { // jovenes infectados
             Persona persona = Persona(i, 1, rand() % (dmx - dmn + 1) + dmn, posx, posy, rmj, vmj, tmm, true);
             espacio[posx][posy].push_back(persona);
+            numInfectados[posx][posy]++;
         }
         else { // jovenes sanos
             Persona persona = Persona(i, 0, 0, posx, posy, rmj, vmj, tmm, true);
@@ -97,6 +99,7 @@ int main(int argc, char* argv[]){
         if (i < mayoresi) { // mayores infectados
             Persona persona = Persona(i, 1, rand() % (dmx - dmn + 1) + dmn, posx, posy, rmm, vmm, tmm, false);
             espacio[posx][posy].push_back(persona);
+            numInfectados[posx][posy]++;
         }
         else { // mayores sanos
             Persona persona = Persona(i, 0, 0, posx, posy, rmm, vmm, tmm, false);
@@ -118,10 +121,20 @@ int main(int argc, char* argv[]){
 #pragma omp for  schedule(static) private (i ,j, k, l)
         for (i = 0; i < tmm; ++i) {
             for (j = 0; j < tmm; ++j) {
-                int infectados = 0;
-                for (k = 0; k < espacio[i][j].size(); ++k) {// cuenta infectados y los procesa
-                    if (espacio[i][j][k].estado == 1) {
-                        infectados++;
+                for (k = 0; k < espacio[i][j].size(); ++k) { // procesa los no infectados
+                    if (espacio[i][j][k].estado == 0) { // es suceptible
+                        for (l = 0; l < numInfectados[i][j] && espacio[i][j][k].estado == 0; ++l) { //calcula la proba de contagiarse por cada infectado en la casilla
+                            double proba = rand() % 100;
+                            proba = proba / 100;
+                            if (proba <= piv) {
+                                infectadosGlobal++; // tal vez hay que hacerlo critical
+                                suceptiblesGlobal--;
+                                espacio[i][j][k].estado = 1;
+                                espacio[i][j][k].duracionEnfermedad = rand() % (dmx - dmn + 1) + dmn;
+                            }
+                        }
+                    }
+                    else if(espacio[i][j][k].estado == 1) {
                         if (espacio[i][j][k].duracionEnfermedad == 0) {//temino enfermedad
                             double proba = rand() % 100;
                             proba = proba / 100;
@@ -154,20 +167,6 @@ int main(int argc, char* argv[]){
                         }
                         else { // reduce lo que le queda de enfermedad 
                             espacio[i][j][k].duracionEnfermedad--;
-                        }
-                    }
-                }
-                for (k = 0; k < espacio[i][j].size(); ++k) { // procesa los no infectados
-                    if (espacio[i][j][k].estado == 0) { // es suceptible
-                        for (l = 0; l < infectados && espacio[i][j][k].estado == 0; ++l) { //calcula la proba de contagiarse por cada infectado en la casilla
-                            double proba = rand() % 100;
-                            proba = proba / 100;
-                            if (proba <= piv) {
-                                infectadosGlobal++; // tal vez hay que hacerlo critical
-                                suceptiblesGlobal--;
-                                espacio[i][j][k].estado = 1;
-                                espacio[i][j][k].duracionEnfermedad = rand() % (dmx - dmn + 1) + dmn;
-                            }
                         }
                     }
                     else if (espacio[i][j][k].estado == 2) {
@@ -240,14 +239,22 @@ int main(int argc, char* argv[]){
 
                         // cout << "pos nueva: "<< espacio[i][j][k].posicionActual[0] << " " << espacio[i][j][k].posicionActual[1] << endl;
                         if(espacio[i][j][k].estado != 3)
-                        espacionuevo[espacio[i][j][k].posicionActual[0]][espacio[i][j][k].posicionActual[1]].push_back(espacio[i][j][k]);
+                            espacionuevo[espacio[i][j][k].posicionActual[0]][espacio[i][j][k].posicionActual[1]].push_back(espacio[i][j][k]);
+
+                        if (espacio[i][j][k].estado == 1)
+                            numInfectadosnuevo[espacio[i][j][k].posicionActual[0]][espacio[i][j][k].posicionActual[1]]++;
                     }
                 }
             }
         }
-
+        espacio.clear();
         espacio = vector(espacionuevo);
+        espacionuevo.clear();
         espacionuevo = vector<vector<vector<Persona> > >(tmm, vector<vector<Persona>>(tmm, vector<Persona>()));
+        numInfectados.clear();
+        numInfectados = vector(numInfectadosnuevo);
+        numInfectadosnuevo.clear();
+        numInfectadosnuevo = vector<vector<int>>(tmm, vector<int>(tmm));
         porcentajeSuc = suceptiblesGlobal;
         cout << g << endl;
         porcentajeSuc = (porcentajeSuc / cpr)*100;
