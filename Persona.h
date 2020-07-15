@@ -30,7 +30,7 @@ public:
 
 	bool esJoven;
 
-	Persona(int nId, bool nEstaInfectado, int posX, int posY, int rad, int vel, int tmm, bool edad);
+	Persona(int nId, int estado, int durenf, int posX, int posY, int rad, int vel, int tmm, bool edad);
 
 
 	~Persona();
@@ -39,7 +39,7 @@ private:
 
 };
 
-Persona::Persona(int nId, bool estado, int posX, int posY, int rad, int vel, int tmm, bool edad)
+Persona::Persona(int nId, int estado, int durenf, int posX, int posY, int rad, int vel, int tmm, bool edad)
 {
 	this->id = nId;
 	this->esJoven = edad;
@@ -50,7 +50,7 @@ Persona::Persona(int nId, bool estado, int posX, int posY, int rad, int vel, int
 	this->posicionActual[1] = posY;
 	this->rad = rad;
 	this->vel = vel;
-	this->duracionEnfermedad = 0;
+	this->duracionEnfermedad = durenf;
 	this->tiempoInmune = 0;
 	if (rad == 0) {
 		this->maxx = tmm - 1;

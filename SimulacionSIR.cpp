@@ -19,32 +19,37 @@ int main()
     resultado.open("resultado.csv");
     resultado << "Porcentaje de Susceptibles, Cantidad de Suceptibles, Porcentaje de Infectados, Cantidad de Infectados, Porcentaje de Recuperados, Cantidad de Recuperados, Porcentaje de Muertos, Cantidad de Muertos \n";
     // TODO: PEDIRLO PARAM
-    int cpr = 100000; // cantidad de personas int ]0,10000000]
+    int cpr = 4000000; // cantidad de personas int ]0,10000000]
     double piv = 0.7; // potencia infecciosa ]0,1[
     double prj = 0.75; // probabilidad de recuperacion jovenes ]0,1[
     double prv = 0.5; // probabilidad de recuperacion mayores ]0,1[
-    int poi = 100; // cantidad de personas originalmente infectadas ]0,100]
+    int poi = 4000; // cantidad de personas originalmente infectadas ]0,100]
     double toc = 0.3; // tasa de ocupación ]0,1[ 
     int dmn = 50; // duración minima de la enfermedad ]0,100]
     int dmx = 100; // duración máxima de la enfermedad ]0,100]
     int rmj = 4; // radio de movilidad de jovenes [0,5]
     int rmm = 2; // radio de movilidad de mayores [0,5]
     int vmj = 3; // velocidad de movimiento jovenes [0,5]
-    int vmm = 1; // velocidad de movimiento mayores [0,5]
-    int drc = 1000; // duración de la siomulación ]0,100000]
+    int vmm = 2; // velocidad de movimiento mayores [0,5]
+    int drc = 365; // duración de la siomulación ]0,100000]
     int tmm = floor(sqrt(cpr / toc)) + 1; // tamaño de la matriz
-    int nhilos = 8; // cantidad de hilos
+    int nhilos = 16; // cantidad de hilos
     vector<vector<vector<Persona> > > espacio(tmm, vector<vector<Persona>>(tmm, vector<Persona>()));
     vector<vector<vector<Persona> > > espacionuevo(tmm, vector<vector<Persona>>(tmm, vector<Persona>()));
+    //vector<vector<int>> numInfectados(tmm, vector<int>(tmm));
     //Variables para recolectar los datos al final de cada dia
     int  suceptiblesGlobal = cpr - poi;
     int  infectadosGlobal = poi;
     int  recuperadosGlobal = 0;
     int  muertosGlobal = 0;
-    double promedioSuc = 0.0;
-    double promedioInf = 0.0;
-    double promedioRec = 0.0;
-    double promedioMue = 0.0;
+    double porcentajeSuc = suceptiblesGlobal;
+    double porcentajeInf = infectadosGlobal;
+    double porcentajeRec = 0.0;
+    double porcentajeMue = 0.0;
+    porcentajeSuc = (porcentajeSuc / cpr) * 100;
+    porcentajeInf = (porcentajeInf / cpr) * 100;
+    resultado << porcentajeSuc << "," << suceptiblesGlobal << "," << porcentajeInf << "," << infectadosGlobal << "," << porcentajeRec << "," << recuperadosGlobal << "," << porcentajeMue << "," << muertosGlobal << "\n";
+
 
     //Crear personas
     int jovenes = floor(cpr * 0.9045); //cantidad de personas jovenes
@@ -52,6 +57,8 @@ int main()
     int jovenesi = floor(poi * 0.9045); //cantidad de personas jovenes infectadas
     int mayoresi = poi - jovenesi; //cantidad de personas mayores infectadas
     int i, j, k, l;
+    double inicio, final;
+    inicio = omp_get_wtime();
 
 #pragma omp_set_num_threads(nhilos) 
 
@@ -60,11 +67,11 @@ int main()
         int posx = rand() % tmm;
         int posy = rand() % tmm;
         if (i < jovenesi) { // jovenes infectados
-            Persona persona = Persona(i, 1, posx, posy, rmj, vmj, tmm, true);
+            Persona persona = Persona(i, 1, rand() % (dmx - dmn + 1) + dmn, posx, posy, rmj, vmj, tmm, true);
             espacio[posx][posy].push_back(persona);
         }
         else { // jovenes sanos
-            Persona persona = Persona(i, 0, posx, posy, rmj, vmj, tmm, true);
+            Persona persona = Persona(i, 0, 0, posx, posy, rmj, vmj, tmm, true);
             espacio[posx][posy].push_back(persona);
         }
     }
@@ -74,11 +81,11 @@ int main()
         int posx = rand() % tmm;
         int posy = rand() % tmm;
         if (i < mayoresi) { // mayores infectados
-            Persona persona = Persona(i, 1, posx, posy, rmm, vmm, tmm, false);
+            Persona persona = Persona(i, 1, rand() % (dmx - dmn + 1) + dmn, posx, posy, rmm, vmm, tmm, false);
             espacio[posx][posy].push_back(persona);
         }
         else { // mayores sanos
-            Persona persona = Persona(i, 0, posx, posy, rmm, vmm, tmm, false);
+            Persona persona = Persona(i, 0, 0, posx, posy, rmm, vmm, tmm, false);
             espacio[posx][posy].push_back(persona);
         }
     }
@@ -218,6 +225,7 @@ int main()
                     {
 
                         // cout << "pos nueva: "<< espacio[i][j][k].posicionActual[0] << " " << espacio[i][j][k].posicionActual[1] << endl;
+                        if(espacio[i][j][k].estado != 3)
                         espacionuevo[espacio[i][j][k].posicionActual[0]][espacio[i][j][k].posicionActual[1]].push_back(espacio[i][j][k]);
                     }
                 }
@@ -226,15 +234,16 @@ int main()
 
         espacio = vector(espacionuevo);
         espacionuevo = vector<vector<vector<Persona> > >(tmm, vector<vector<Persona>>(tmm, vector<Persona>()));
-        promedioSuc = suceptiblesGlobal;
-        promedioSuc = promedioSuc / cpr;
-        promedioInf = infectadosGlobal;
-        promedioInf = promedioInf / cpr;
-        promedioRec = recuperadosGlobal;
-        promedioRec = promedioRec / cpr;
-        promedioMue = muertosGlobal;
-        promedioMue = promedioMue / cpr;
-        resultado << promedioSuc << "," << suceptiblesGlobal << "," << promedioInf << "," << infectadosGlobal << "," << promedioRec << "," << recuperadosGlobal << "," << promedioMue << "," << muertosGlobal << "\n";
+        porcentajeSuc = suceptiblesGlobal;
+        cout << g << endl;
+        porcentajeSuc = (porcentajeSuc / cpr)*100;
+        porcentajeInf = infectadosGlobal;
+        porcentajeInf = (porcentajeInf / cpr)*100;
+        porcentajeRec = recuperadosGlobal;
+        porcentajeRec = (porcentajeRec / cpr)*100;
+        porcentajeMue = muertosGlobal;
+        porcentajeMue = (porcentajeMue / cpr)*100;
+        resultado << porcentajeSuc << "," << suceptiblesGlobal << "," << porcentajeInf << "," << infectadosGlobal << "," << porcentajeRec << "," << recuperadosGlobal << "," << porcentajeMue << "," << muertosGlobal << "\n";
         /* cout << "dia:";
          cout << g << endl;
          cout << suceptiblesGlobal << endl;
@@ -243,5 +252,6 @@ int main()
          cout << muertosGlobal << endl;*/
 
     }
-
+    final = omp_get_wtime();
+    printf("tiempo final:%f", final - inicio);
 }
